@@ -108,9 +108,16 @@ elif menu == "KML ➜ Titik Tengah ➜ CSV":
                     })
 
         df_kml = pd.DataFrame(data)
-        st.success(f"✅ Berhasil ditemukan {len(df_kml)} polygon.")
 
-        st.dataframe(df_kml)
+        # Format akhir: name | description | wkt
+        df_kml['description'] = "Titik tengah polygon"
+        df_kml['wkt'] = df_kml.apply(lambda row: f"POINT({row['longitude']} {row['latitude']})", axis=1)
+        df_final = df_kml[['name', 'description', 'wkt']]
 
-        csv_kml = df_kml.to_csv(index=False).encode('utf-8')
-        st.download_button("📥 Download Titik Tengah (CSV)", csv_kml, "titik_tengah_dari_kml.csv", "text/csv")
+        st.success(f"✅ Berhasil ditemukan {len(df_final)} polygon.")
+
+        st.dataframe(df_final)
+
+        csv_kml = df_final.to_csv(index=False).encode('utf-8')
+        st.download_button("📥 Download Titik Tengah (CSV Format WKT)", csv_kml, "titik_tengah_dalam_format_wkt.csv", "text/csv")
+
