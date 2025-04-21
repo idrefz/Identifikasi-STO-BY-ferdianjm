@@ -2,19 +2,21 @@ import streamlit as st
 import pandas as pd
 from matplotlib.path import Path
 import re
-import io
 
-st.title("📍 Mapping Project ke Polygon STO (Tanpa Shapely)")
+st.title("📍 Mapping Project ke Polygon STO (Excel STO + Tanpa Shapely)")
 
-sto_file = st.file_uploader("Upload File STO (CSV)", type="csv")
+# Upload file
+sto_file = st.file_uploader("Upload File STO (Excel - .xlsx)", type="xlsx")
 project_file = st.file_uploader("Upload File Project (CSV)", type="csv")
 
+# Function untuk parsing POINT
 def parse_point(wkt):
     match = re.match(r"POINT\s*\(\s*([\d\.\-]+)\s+([\d\.\-]+)\s*\)", wkt)
     if match:
         return float(match.group(1)), float(match.group(2))
     return None
 
+# Function untuk parsing POLYGON
 def parse_polygon(wkt):
     match = re.search(r"POLYGON\s*\(\((.*?)\)\)", wkt)
     if match:
@@ -27,7 +29,8 @@ def parse_polygon(wkt):
     return None
 
 if sto_file and project_file:
-    df_sto = pd.read_csv(sto_file)
+    # Baca Excel untuk STO
+    df_sto = pd.read_excel(sto_file)
     df_project = pd.read_csv(project_file)
 
     # Parsing polygon ke Path object
@@ -59,6 +62,5 @@ if sto_file and project_file:
 
     st.dataframe(df_result)
 
-    # Download
     csv = df_result.to_csv(index=False).encode('utf-8')
     st.download_button("📥 Download Hasil CSV", csv, "hasil_mapping.csv", "text/csv")
