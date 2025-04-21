@@ -1,8 +1,4 @@
 streamlit
-geopandas
-shapely
-fiona
-pyproj
-rtree
 pandas
+shapely
 xlsxwriter
