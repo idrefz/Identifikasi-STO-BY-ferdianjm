@@ -1,63 +1,51 @@
 import streamlit as st
 import pandas as pd
-from shapely import wkt
-from shapely.geometry import shape, Point
-from io import BytesIO
+from shapely.wkt import loads as load_wkt
+from shapely.geometry import Point
+import io
 
-st.set_page_config(page_title="Mapping Project ke STO", layout="wide")
-st.title("📍 Identifikasi STO dari Titik Project dan Polygon")
+st.title("Mapping Project ke Polygon STO")
 
-st.markdown("""
-Upload:
-- 🗺️ **Polygon STO** (CSV) → harus punya kolom polygon (WKT) dan nama STO
-- 📌 **Project** (CSV) → harus punya kolom `name` dan `wkt` (format POINT)
-""")
+# Upload file STO
+sto_file = st.file_uploader("Upload File STO (CSV)", type="csv")
+# Upload file project
+project_file = st.file_uploader("Upload File Project (CSV)", type="csv")
 
-# Upload
-polygon_file = st.file_uploader("🗺️ Upload File Polygon STO", type=["csv"])
-project_file = st.file_uploader("📌 Upload File Project", type=["csv"])
+if sto_file and project_file:
+    # Load CSV
+    df_sto = pd.read_csv(sto_file)
+    df_project = pd.read_csv(project_file)
 
-if polygon_file and project_file:
-    try:
-        # === Baca Polygon CSV ===
-        df_poly = pd.read_csv(polygon_file)
-        poly_cols = df_poly.columns.tolist()
-        sto_col = st.selectbox("📛 Kolom Nama STO", poly_cols)
-        poly_col = st.selectbox("📐 Kolom Polygon (WKT)", poly_cols)
+    # Ubah kolom polygon STO jadi objek Polygon
+    df_sto['polygon_geom'] = df_sto['Polygon dalam Format WKT'].apply(load_wkt)
 
-        df_poly["polygon"] = df_poly[poly_col].apply(wkt.loads)
+    result = []
 
-        # === Baca Project CSV ===
-        df_proj = pd.read_csv(project_file)
-        if "name" not in df_proj.columns or "wkt" not in df_proj.columns:
-            st.error("CSV Project harus punya kolom 'name' dan 'wkt'")
-        else:
-            df_proj["point"] = df_proj["wkt"].apply(wkt.loads)
-            df_proj["latitude"] = df_proj["point"].apply(lambda p: p.y)
-            df_proj["longitude"] = df_proj["point"].apply(lambda p: p.x)
-            df_proj["koordinat"] = df_proj["latitude"].astype(str) + ", " + df_proj["longitude"].astype(str)
+    for idx, project in df_project.iterrows():
+        point = load_wkt(project['wkt'])  # diasumsikan berbentuk POINT(x y)
+        matched_sto = None
 
-            # === Cek point dalam polygon ===
-            def find_sto(point):
-                for idx, row in df_poly.iterrows():
-                    if row["polygon"].contains(point):
-                        return row[sto_col]
-                return "TIDAK TERDETEKSI"
+        for _, sto in df_sto.iterrows():
+            if sto['polygon_geom'].contains(point):
+                matched_sto = sto['Nama STO']
+                break
 
-            df_proj["STO"] = df_proj["point"].apply(find_sto)
+        result.append({
+            'name': project['name'],
+            'sto': matched_sto if matched_sto else "Tidak ditemukan",
+            'wkt': project['wkt']
+        })
 
-            result = df_proj[["name", "STO", "koordinat"]]
+    df_result = pd.DataFrame(result)
+    st.success("Mapping selesai!")
 
-            st.success("✅ Mapping selesai!")
-            st.dataframe(result)
+    st.dataframe(df_result)
 
-            # Download Excel
-            output = BytesIO()
-            with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
-                result.to_excel(writer, index=False, sheet_name="Mapping")
-            st.download_button("⬇️ Download Hasil Excel", output.getvalue(), "hasil_mapping.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-
-    except Exception as e:
-        st.error(f"Terjadi error: {e}")
-else:
-    st.info("Silakan upload kedua file.")
+    # Download link
+    csv = df_result.to_csv(index=False).encode('utf-8')
+    st.download_button(
+        label="📥 Download Hasil CSV",
+        data=csv,
+        file_name="hasil_mapping.csv",
+        mime='text/csv',
+    )
