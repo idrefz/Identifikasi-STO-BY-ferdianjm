@@ -4,7 +4,7 @@ from matplotlib.path import Path
 import re
 from xml.dom import minidom
 
-st.title("📍 Aplikasi Geospasial STO")
+st.title("📍 Aplikasi Geospasial STO by @ferdianjm")
 
 menu = st.sidebar.selectbox("Pilih Menu", ["Mapping Project ke STO", "KML ➜ Titik Tengah ➜ CSV"])
 
