@@ -3,7 +3,7 @@ import pandas as pd
 from matplotlib.path import Path
 import re
 
-st.title("📍 Mapping Project ke Polygon STO (Excel STO + Tanpa Shapely)")
+st.title("📍 Mapping Project ke Polygon STO weh (Excel STO + Tanpa Shapely)")
 
 # Upload file
 sto_file = st.file_uploader("Upload File STO (Excel - .xlsx)", type="xlsx")
