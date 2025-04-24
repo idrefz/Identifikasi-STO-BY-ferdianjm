@@ -76,7 +76,7 @@ from io import BytesIO
 
 excel_buffer = BytesIO()
 df_result.to_excel(excel_buffer, index=False, engine='openpyxl')
-st.download_button("📥 Download Hasil Excel", data=excel_buffer.getvalue(), file_name="hasil_mapping.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+st.download_button("📥 Download Hasil Excel!", data=excel_buffer.getvalue(), file_name="hasil_mapping.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 # -------------------- MENU 2: Titik Tengah dari Polygon KML --------------------
 
