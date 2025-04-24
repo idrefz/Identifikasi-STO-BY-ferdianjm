@@ -72,8 +72,11 @@ if menu == "Mapping Project ke STO":
         st.success("🎉 Mapping selesai!")
         st.dataframe(df_result)
 
-        csv = df_result.to_csv(index=False).encode('utf-8')
-        st.download_button("📥 Download Hasil CSV", csv, "hasil_mapping.csv", "text/csv")
+from io import BytesIO
+
+excel_buffer = BytesIO()
+df_result.to_excel(excel_buffer, index=False, engine='openpyxl')
+st.download_button("📥 Download Hasil Excel", data=excel_buffer.getvalue(), file_name="hasil_mapping.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 # -------------------- MENU 2: Titik Tengah dari Polygon KML --------------------
 
