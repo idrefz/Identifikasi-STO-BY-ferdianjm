@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from matplotlib.path import Path
 import re
+from io import BytesIO
 from xml.dom import minidom
 
 st.title("📍 Aplikasi Geospasial STO by @ferdianjm")
@@ -72,11 +73,17 @@ if menu == "Mapping Project ke STO":
         st.success("🎉 Mapping selesai!")
         st.dataframe(df_result)
 
-from io import BytesIO
+
 
 excel_buffer = BytesIO()
 df_result.to_excel(excel_buffer, index=False, engine='openpyxl')
-st.download_button("📥 Download Hasil Excel!", data=excel_buffer.getvalue(), file_name="hasil_mapping.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+st.download_button(
+    label="📥 Download Hasil Excel",
+    data=excel_buffer.getvalue(),
+    file_name="hasil_mapping.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+)
+
 
 # -------------------- MENU 2: Titik Tengah dari Polygon KML --------------------
 
