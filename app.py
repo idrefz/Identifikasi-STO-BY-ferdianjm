@@ -36,7 +36,7 @@ def calculate_centroid(coords):
         return None, None
     return sum(x_list)/n, sum(y_list)/n
 
-# -------------------- MENU 1: Mapping Project --------------------
+# -------------------- MENU 1: Mapping Project ke STO --------------------
 
 if menu == "Mapping Project ke STO":
     sto_file = st.file_uploader("Upload File STO (Excel - .xlsx)", type="xlsx")
@@ -73,17 +73,15 @@ if menu == "Mapping Project ke STO":
         st.success("🎉 Mapping selesai!")
         st.dataframe(df_result)
 
-
-
-excel_buffer = BytesIO()
-df_result.to_excel(excel_buffer, index=False, engine='openpyxl')
-st.download_button(
-    label="📥 Download Hasil Excel",
-    data=excel_buffer.getvalue(),
-    file_name="hasil_mapping.xlsx",
-    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-)
-
+        # Download hasil dalam format Excel
+        excel_buffer = BytesIO()
+        df_result.to_excel(excel_buffer, index=False, engine='openpyxl')
+        st.download_button(
+            label="📥 Download Hasil Excel",
+            data=excel_buffer.getvalue(),
+            file_name="hasil_mapping.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
 
 # -------------------- MENU 2: Titik Tengah dari Polygon KML --------------------
 
@@ -125,9 +123,12 @@ elif menu == "KML ➜ Titik Tengah ➜ CSV":
         df_final = df_kml[['name', 'description', 'wkt']]
 
         st.success(f"✅ Berhasil ditemukan {len(df_final)} polygon.")
-
         st.dataframe(df_final)
 
         csv_kml = df_final.to_csv(index=False).encode('utf-8')
-        st.download_button("📥 Download Titik Tengah (CSV Format WKT)", csv_kml, "titik_tengah_dalam_format_wkt.csv", "text/csv")
-
+        st.download_button(
+            label="📥 Download Titik Tengah (CSV Format WKT)",
+            data=csv_kml,
+            file_name="titik_tengah_dalam_format_wkt.csv",
+            mime="text/csv"
+        )
